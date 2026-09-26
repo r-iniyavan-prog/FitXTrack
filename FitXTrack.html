@@ -1,0 +1,327 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FitXTrack</title>
+<style>
+:root{--bg:#0f172a;--s:#1e293b;--c:#1a2640;--b:#334155;--a:#6366f1;--g:#10b981;--r:#ef4444;--y:#f59e0b;--t:#f1f5f9;--m:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--t);font-family:'Segoe UI',sans-serif;min-height:100vh}
+header{background:var(--s);border-bottom:1px solid var(--b);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,#6366f1,#10b981);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hright{display:flex;gap:10px;align-items:center}
+#clock{font-size:.85rem;color:var(--m);background:var(--c);border:1px solid var(--b);border-radius:999px;padding:5px 14px}
+#notif-btn{cursor:pointer;background:var(--c);border:1px solid var(--b);color:var(--t);border-radius:999px;padding:5px 14px;font-size:.85rem}
+#notif-btn:hover{background:var(--a);border-color:var(--a)}
+main{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:24px}
+.card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:20px;transition:transform .2s}
+.card:hover{transform:translateY(-3px)}
+.card-top{height:3px;border-radius:3px;margin-bottom:14px}
+.ct-a{background:var(--a)}.ct-r{background:var(--r)}.ct-y{background:var(--y)}.ct-g{background:var(--g)}
+.clabel{font-size:.72rem;color:var(--m);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.cval{font-size:2rem;font-weight:900;line-height:1}
+.csub{font-size:.78rem;color:var(--m);margin-top:5px}
+.cbar{height:5px;background:var(--b);border-radius:4px;margin-top:12px}
+.cbar-f{height:100%;border-radius:4px;transition:width .6s ease}
+.icon{font-size:1.6rem;margin-bottom:6px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.pulse{animation:pulse 1s infinite}
+.section-title{font-size:.85rem;font-weight:700;color:var(--m);text-transform:uppercase;letter-spacing:.1em;margin:24px 0 12px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:24px}
+.chart-box{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:18px}
+.chart-box h3{font-size:.82rem;color:var(--m);margin-bottom:12px}
+canvas{width:100%!important}
+.hr-sched{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:16px 18px;margin-bottom:24px}
+.hr-sched h4{font-size:.78rem;color:var(--m);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.slots{display:flex;flex-wrap:wrap;gap:6px}
+.slot{padding:5px 12px;border-radius:8px;font-size:.75rem;font-weight:700;background:var(--s);border:1px solid var(--b);color:var(--m)}
+.slot.done{background:#1f3520;border-color:#16a34a;color:#4ade80}
+.slot.now{background:#312e81;border-color:var(--a);color:#a5b4fc;animation:pulse 1.5s infinite}
+.controls{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:24px}
+.ctrl{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:16px 18px;flex:1;min-width:250px}
+.ctrl h4{font-size:.78rem;color:var(--m);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.brow{display:flex;flex-wrap:wrap;gap:7px}
+.btn{cursor:pointer;border:1px solid var(--b);border-radius:8px;padding:7px 14px;font-size:.82rem;font-weight:600;background:var(--s);color:var(--t);transition:all .15s}
+.btn:hover,.btn:active{background:var(--a);border-color:var(--a)}
+.btn.green{background:var(--g);border-color:var(--g);color:#fff}
+.btn.green:hover{background:#059669}
+.btn.red{background:var(--r);border-color:var(--r);color:#fff}
+.btn.blue{background:var(--a);border-color:var(--a);color:#fff}
+input[type=range]{width:100%;accent-color:var(--a);margin:8px 0 4px}
+.log-wrap{background:var(--c);border:1px solid var(--b);border-radius:14px;overflow:hidden;margin-bottom:24px}
+.log-head{padding:12px 18px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center}
+.log-head h3{font-size:.82rem;color:var(--m)}
+table{width:100%;border-collapse:collapse}
+th{background:var(--s);font-size:.7rem;color:var(--m);text-transform:uppercase;letter-spacing:.06em;padding:9px 14px;text-align:left}
+tr{border-top:1px solid var(--b)}
+tr:hover{background:var(--s)}
+td{padding:9px 14px;font-size:.83rem}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.7rem;font-weight:700}
+.bw{background:#064e3b;color:#6ee7b7}.br{background:#312e81;color:#a5b4fc}
+.bc{background:#451a03;color:#fcd34d}.by{background:#3b0764;color:#d8b4fe}
+.brest{background:#1e3a5f;color:#93c5fd}.bhr{background:#450a0a;color:#fca5a5}
+#toasts{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:999}
+.toast{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:12px 16px;min-width:270px;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:tin .3s ease}
+.toast.heart{border-left:4px solid var(--r)}.toast.info{border-left:4px solid var(--a)}.toast.ok{border-left:4px solid var(--g)}
+.ttitle{font-weight:700;font-size:.88rem;margin-bottom:3px}
+.tbody{font-size:.78rem;color:var(--m)}
+@keyframes tin{from{transform:translateX(80px);opacity:0}to{transform:translateX(0);opacity:1}}
+footer{text-align:center;color:var(--m);font-size:.75rem;padding:16px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">⚡ FitXTrack</div>
+  <div class="hright">
+    <span id="clock"></span>
+    <button id="notif-btn" onclick="askNotif()">🔔 Enable Alerts</button>
+  </div>
+</header>
+<main>
+  <div class="cards">
+    <div class="card"><div class="card-top ct-a"></div><div class="icon">👟</div><div class="clabel">Steps Today</div><div class="cval" id="sv">0</div><div class="csub" id="ss">Goal: 10,000 (0%)</div><div class="cbar"><div class="cbar-f" id="sb" style="width:0%;background:var(--a)"></div></div></div>
+    <div class="card"><div class="card-top ct-r"></div><div class="icon">❤️ <span class="pulse">●</span></div><div class="clabel">Heart Rate (BPM)</div><div class="cval" id="hv">--</div><div class="csub">Next check: <span id="nc">2m 0s</span></div><div class="cbar"><div class="cbar-f" id="hb" style="width:0%;background:var(--r)"></div></div></div>
+    <div class="card"><div class="card-top ct-y"></div><div class="icon">🔥</div><div class="clabel">Calories Burned</div><div class="cval" id="cv">0</div><div class="csub">kcal — Goal: 500</div><div class="cbar"><div class="cbar-f" id="cb" style="width:0%;background:var(--y)"></div></div></div>
+    <div class="card"><div class="card-top ct-g"></div><div class="icon">⚡</div><div class="clabel">Active Minutes</div><div class="cval" id="av">0</div><div class="csub" id="al">Currently: Resting</div><div class="cbar"><div class="cbar-f" id="ab" style="width:0%;background:var(--g)"></div></div></div>
+  </div>
+
+  <div class="hr-sched"><h4>💓 2-Hour Heart Rate Schedule (Demo: every 2 min)</h4><div class="slots" id="slots"></div></div>
+
+  <div class="section-title">📊 Live Analytics</div>
+  <div class="charts">
+    <div class="chart-box"><h3>Steps Per Hour</h3><canvas id="c1" height="160"></canvas></div>
+    <div class="chart-box"><h3>Heart Rate Timeline</h3><canvas id="c2" height="160"></canvas></div>
+    <div class="chart-box"><h3>Activity Split (min)</h3><canvas id="c3" height="160"></canvas></div>
+    <div class="chart-box"><h3>Calories Per Hour</h3><canvas id="c4" height="160"></canvas></div>
+  </div>
+
+  <div class="section-title">🎮 Controls</div>
+  <div class="controls">
+    <div class="ctrl">
+      <h4>Activity</h4>
+      <div class="brow">
+        <button class="btn" onclick="setAct('Walking')">🚶 Walk</button>
+        <button class="btn" onclick="setAct('Running')">🏃 Run</button>
+        <button class="btn" onclick="setAct('Cycling')">🚴 Cycle</button>
+        <button class="btn" onclick="setAct('Yoga')">🧘 Yoga</button>
+        <button class="btn" onclick="setAct('Resting')">😴 Rest</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <h4>Heart Rate — BPM: <span id="hrv">72</span></h4>
+      <input type="range" id="hrs" min="40" max="200" value="72" oninput="document.getElementById('hrv').textContent=this.value">
+      <div class="brow">
+        <button class="btn blue" onclick="logHR()">📋 Log HR</button>
+        <button class="btn" onclick="forceHR()">⚡ Trigger 2h Check</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <h4>Steps</h4>
+      <div class="brow">
+        <button class="btn" onclick="addS(100)">+100</button>
+        <button class="btn" onclick="addS(500)">+500</button>
+        <button class="btn" onclick="addS(1000)">+1k</button>
+        <button class="btn" onclick="addS(2500)">+2.5k</button>
+      </div>
+      <div class="brow" style="margin-top:8px">
+        <button class="btn green" id="auto-btn" onclick="autoSim()">▶ Simulate Day</button>
+        <button class="btn red" onclick="resetAll()">🗑 Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">📋 Activity Log</div>
+  <div class="log-wrap">
+    <div class="log-head"><h3>Recent Events</h3><span id="lc" style="font-size:.75rem;color:var(--m)">0 entries</span></div>
+    <div style="overflow-x:auto">
+      <table><thead><tr><th>Time</th><th>Event</th><th>Type</th><th>BPM</th><th>Steps</th><th>Cals</th></tr></thead>
+      <tbody id="lb"></tbody></table>
+    </div>
+  </div>
+</main>
+<footer>⚡ FitXTrack — Everyday Activity Monitor &bull; All data stored locally</footer>
+<div id="toasts"></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────
+var D={steps:0,cals:0,actMin:0,hr:null,act:'Resting',hrLog:[],sph:new Array(24).fill(0),cph:new Array(24).fill(0),log:[],amin:{Walking:0,Running:0,Cycling:0,Yoga:0,Resting:0},nextHR:0,autoOn:false,autoTimer:null};
+
+// ── CLOCK ──────────────────────────────────────────────
+function tick(){document.getElementById('clock').textContent=new Date().toLocaleTimeString();}
+setInterval(tick,1000);tick();
+
+// ── SIMPLE CANVAS CHARTS ───────────────────────────────
+function clearC(id){var c=document.getElementById(id);c.width=c.parentElement.clientWidth;return c.getContext('2d');}
+
+function barChart(id,data,color,labels){
+  var ctx=clearC(id);var W=ctx.canvas.width;var H=ctx.canvas.height;
+  ctx.clearRect(0,0,W,H);
+  var max=Math.max(...data,1);var n=data.length;var bw=(W-40)/n;
+  ctx.fillStyle='#334155';
+  for(var i=0;i<n;i++){var bh=((data[i]/max)*(H-30));ctx.fillRect(40+i*bw+2,H-20-bh,bw-4,bh);}
+  ctx.fillStyle=color;
+  for(var i=0;i<n;i++){var bh=((data[i]/max)*(H-30));if(data[i]>0)ctx.fillRect(40+i*bw+2,H-20-bh,bw-4,bh);}
+  ctx.fillStyle='#94a3b8';ctx.font='9px sans-serif';ctx.textAlign='center';
+  if(labels){var step=Math.ceil(n/8);for(var i=0;i<n;i+=step)ctx.fillText(labels[i],40+i*bw+bw/2,H-5);}
+  ctx.fillStyle='#94a3b8';ctx.textAlign='right';ctx.font='9px sans-serif';
+  ctx.fillText(max,38,12);ctx.fillText(0,38,H-20);
+}
+
+function lineChart(id,data,labels,color){
+  var ctx=clearC(id);var W=ctx.canvas.width;var H=ctx.canvas.height;
+  ctx.clearRect(0,0,W,H);
+  if(data.length<2){ctx.fillStyle='#94a3b8';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Waiting for readings…',W/2,H/2);return;}
+  var max=Math.max(...data,1);var min=Math.min(...data,0);var range=max-min||1;
+  var pts=data.map((v,i)=>({x:40+(i/(data.length-1))*(W-50),y:H-20-((v-min)/range)*(H-35)}));
+  ctx.strokeStyle='rgba(239,68,68,0.2)';ctx.lineWidth=1;ctx.setLineDash([]);
+  ctx.fillStyle='rgba(239,68,68,0.1)';ctx.beginPath();ctx.moveTo(pts[0].x,H-20);
+  pts.forEach(p=>ctx.lineTo(p.x,p.y));ctx.lineTo(pts[pts.length-1].x,H-20);ctx.closePath();ctx.fill();
+  ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));ctx.stroke();
+  ctx.fillStyle=color;pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fill();});
+  ctx.fillStyle='#94a3b8';ctx.font='9px sans-serif';ctx.textAlign='center';
+  var step=Math.max(1,Math.ceil(labels.length/6));
+  labels.forEach((l,i)=>{if(i%step===0)ctx.fillText(l,pts[i].x,H-4);});
+  ctx.textAlign='right';ctx.fillText(max+'bpm',38,12);ctx.fillText(min+'bpm',38,H-20);
+}
+
+function donutChart(id,data,labels,colors){
+  var ctx=clearC(id);var W=ctx.canvas.width;var H=ctx.canvas.height;
+  ctx.clearRect(0,0,W,H);
+  var total=data.reduce((a,b)=>a+b,0);
+  if(total===0){ctx.fillStyle='#94a3b8';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('No activity yet',W/2,H/2);return;}
+  var cx=W/2-50,cy=H/2,r=Math.min(cx,cy)-10,ir=r*0.55,start=-Math.PI/2;
+  data.forEach((v,i)=>{if(v===0)return;var a=(v/total)*Math.PI*2;
+    ctx.fillStyle=colors[i];ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,start,start+a);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#0f172a';ctx.beginPath();ctx.arc(cx,cy,ir,0,Math.PI*2);ctx.fill();
+    start+=a;});
+  ctx.fillStyle='#94a3b8';ctx.font='10px sans-serif';ctx.textAlign='left';
+  labels.forEach((l,i)=>{ctx.fillStyle=colors[i];ctx.fillRect(W-90,10+i*20,10,10);ctx.fillStyle='#94a3b8';ctx.fillText(l+' '+Math.round(data[i])+'m',W-75,20+i*20);});
+}
+
+var HRS=Array.from({length:24},(_,i)=>('0'+i).slice(-2)+':00');
+function drawAll(){
+  barChart('c1',D.sph,'#6366f1',HRS);
+  lineChart('c2',D.hrLog.map(r=>r.bpm),D.hrLog.map(r=>new Date(r.t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})),'#ef4444');
+  donutChart('c3',[D.amin.Walking,D.amin.Running,D.amin.Cycling,D.amin.Yoga,D.amin.Resting],['Walk','Run','Cycle','Yoga','Rest'],['#10b981','#6366f1','#f59e0b','#a855f7','#334155']);
+  barChart('c4',D.cph,'#f59e0b',HRS);
+}
+window.addEventListener('resize',drawAll);
+drawAll();
+
+// ── HR SCHEDULE ────────────────────────────────────────
+function buildSlots(){
+  var c=document.getElementById('slots');c.innerHTML='';
+  var h=new Date().getHours();
+  for(var i=0;i<24;i+=2){
+    var el=document.createElement('div');el.className='slot';
+    var label=('0'+i).slice(-2)+':00';
+    var rd=D.hrLog.find(r=>{var rh=new Date(r.t).getHours();return rh===i||(i<=rh&&rh<i+2);});
+    if(rd){el.classList.add('done');el.textContent=label+' ✓ '+rd.bpm+'bpm';}
+    else if(i<=h&&h<i+2){el.classList.add('now');el.textContent=label+' ← Due';}
+    else{el.textContent=i>h?label:label+' —';}
+    c.appendChild(el);
+  }
+}
+
+// ── HR COUNTDOWN ───────────────────────────────────────
+D.nextHR=Date.now()+2*60*1000;
+setInterval(function(){
+  var r=D.nextHR-Date.now();
+  if(r<=0){autoHRCheck();D.nextHR=Date.now()+2*60*1000;}
+  var m=Math.max(0,Math.floor(r/60000));var s=Math.max(0,Math.floor((r%60000)/1000));
+  document.getElementById('nc').textContent=m+'m '+s+'s';
+},1000);
+
+function hrStatus(b){if(b<60)return'Low – try light activity';if(b<=100)return'Normal ✓';if(b<=140)return'Elevated – active!';return'High ⚠️ – rest & hydrate';}
+function simHR(){var base={Resting:68,Walking:90,Running:145,Cycling:130,Yoga:80};return (base[D.act]||72)+Math.round((Math.random()-.5)*14);}
+
+function autoHRCheck(){var b=simHR();recHR(b);toast('❤️ 2-Hour Heart Rate Check','BPM: '+b+' — '+hrStatus(b),'heart');notif('💓 HR Check','BPM: '+b+' — '+hrStatus(b));}
+function recHR(bpm){var now=new Date();D.hr=bpm;D.hrLog.push({t:now.toISOString(),bpm:bpm});
+  document.getElementById('hv').textContent=bpm;
+  document.getElementById('hb').style.width=Math.min(100,((bpm-40)/160)*100)+'%';
+  addLog(now,'Heart Rate Check','HR',bpm,'—','—');buildSlots();drawAll();}
+
+// ── ACTIVITY ───────────────────────────────────────────
+var AS={Walking:80,Running:160,Cycling:0,Yoga:10,Resting:0};
+var AC={Walking:4,Running:10,Cycling:8,Yoga:3,Resting:1};
+function setAct(a){D.act=a;document.getElementById('al').textContent='Currently: '+a;toast('⚡ Activity','Now: '+a,'info');addLog(new Date(),'Started '+a,a,D.hr||'—','—','—');}
+setInterval(function(){
+  if(!D.autoOn){
+    var a=D.act;var s=Math.round(AS[a]/6*(0.9+Math.random()*.2));var c=Math.round(AC[a]/6*(0.9+Math.random()*.2));
+    if(s>0||a!=='Resting'){addSq(s);addCq(c);D.amin[a]+=10/60;updAct();}
+  }
+},10000);
+
+// ── STEPS/CALS ─────────────────────────────────────────
+function addS(n){addSq(n);addLog(new Date(),'Added '+n+' steps',D.act,D.hr||'—',D.steps,'—');}
+function addSq(n){D.steps+=n;D.sph[new Date().getHours()]+=n;addCq(Math.round(n*.04));updSteps();drawAll();}
+function addCq(c){D.cals+=c;D.cph[new Date().getHours()]+=c;document.getElementById('cv').textContent=D.cals;document.getElementById('cb').style.width=Math.min(100,(D.cals/500)*100)+'%';drawAll();}
+function updSteps(){document.getElementById('sv').textContent=D.steps.toLocaleString();var p=Math.min(100,(D.steps/10000)*100);document.getElementById('sb').style.width=p+'%';document.getElementById('ss').textContent='Goal: 10,000 ('+Math.round(p)+'%)';}
+function updAct(){var a=D.amin;var act=[a.Walking,a.Running,a.Cycling,a.Yoga].reduce(function(x,y){return x+y},0);D.actMin=Math.round(act);document.getElementById('av').textContent=D.actMin;document.getElementById('ab').style.width=Math.min(100,(D.actMin/60)*100)+'%';drawAll();}
+
+// ── LOG ────────────────────────────────────────────────
+var BM={Walking:'bw',Running:'br',Cycling:'bc',Yoga:'by',Resting:'brest',HR:'bhr'};
+function addLog(t,ev,type,bpm,steps,cals){
+  D.log.unshift({t:t,ev:ev,type:type,bpm:bpm,steps:steps,cals:cals});
+  var b=document.getElementById('lb');b.innerHTML='';
+  D.log.slice(0,25).forEach(function(e){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+new Date(e.t).toLocaleTimeString()+'</td><td>'+e.ev+'</td><td><span class="badge '+(BM[e.type]||'brest')+'">'+e.type+'</span></td><td>'+e.bpm+'</td><td>'+e.steps+'</td><td>'+e.cals+'</td>';
+    b.appendChild(tr);
+  });
+  document.getElementById('lc').textContent=D.log.length+' entries';
+}
+
+// ── MANUAL HR ─────────────────────────────────────────
+function logHR(){var b=parseInt(document.getElementById('hrs').value);recHR(b);toast('📋 HR Logged',b+' BPM — '+hrStatus(b),'heart');}
+function forceHR(){autoHRCheck();D.nextHR=Date.now()+2*60*1000;}
+
+// ── AUTO SIMULATE ──────────────────────────────────────
+var AUTO=[{a:'Resting',s:0,c:15},{a:'Walking',s:1200,c:60},{a:'Running',s:3000,c:180},{a:'Resting',s:0,c:20},{a:'Cycling',s:0,c:130},{a:'Walking',s:2000,c:80},{a:'Yoga',s:50,c:45},{a:'Resting',s:0,c:30}];
+var ai=0;
+function autoSim(){
+  if(D.autoOn){clearInterval(D.autoTimer);D.autoOn=false;document.getElementById('auto-btn').textContent='▶ Simulate Day';return;}
+  D.autoOn=true;ai=0;document.getElementById('auto-btn').textContent='⏹ Stop';
+  function run(){
+    if(!D.autoOn||ai>=AUTO.length){D.autoOn=false;document.getElementById('auto-btn').textContent='▶ Simulate Day';clearInterval(D.autoTimer);toast('✅ Done','Full day simulation complete!','ok');return;}
+    var p=AUTO[ai++];setAct(p.a);addSq(p.s);addCq(p.c);D.amin[p.a]+=45;updAct();
+    var b=simHR();recHR(b);addLog(new Date(),'[Auto] '+p.a,p.a,b,p.s,p.c);
+  }
+  run();D.autoTimer=setInterval(run,2200);
+}
+
+// ── RESET ──────────────────────────────────────────────
+function resetAll(){
+  if(!confirm('Reset all FitXTrack data?'))return;
+  clearInterval(D.autoTimer);
+  D={steps:0,cals:0,actMin:0,hr:null,act:'Resting',hrLog:[],sph:new Array(24).fill(0),cph:new Array(24).fill(0),log:[],amin:{Walking:0,Running:0,Cycling:0,Yoga:0,Resting:0},nextHR:Date.now()+2*60*1000,autoOn:false,autoTimer:null};
+  document.getElementById('sv').textContent='0';document.getElementById('hv').textContent='--';document.getElementById('cv').textContent='0';document.getElementById('av').textContent='0';
+  ['sb','hb','cb','ab'].forEach(function(id){document.getElementById(id).style.width='0%';});
+  document.getElementById('ss').textContent='Goal: 10,000 (0%)';document.getElementById('al').textContent='Currently: Resting';
+  document.getElementById('auto-btn').textContent='▶ Simulate Day';document.getElementById('lb').innerHTML='';document.getElementById('lc').textContent='0 entries';
+  buildSlots();drawAll();
+}
+
+// ── NOTIFICATIONS ──────────────────────────────────────
+function toast(title,body,type){
+  var c=document.getElementById('toasts');var el=document.createElement('div');el.className='toast '+type;
+  el.innerHTML='<div class="ttitle">'+title+'</div><div class="tbody">'+body+'</div>';
+  c.appendChild(el);setTimeout(function(){el.remove();},5500);
+}
+async function askNotif(){
+  if(!('Notification'in window)){toast('Not Supported','Your browser does not support notifications','info');return;}
+  var p=await Notification.requestPermission();
+  if(p==='granted'){document.getElementById('notif-btn').textContent='🔔 Alerts ON';document.getElementById('notif-btn').style.background='#10b981';toast('✅ Alerts Enabled','You will get 2-hour heart rate notifications!','ok');}
+  else toast('❌ Blocked','Allow notifications in browser settings','info');
+}
+function notif(t,b){if(typeof Notification!=='undefined'&&Notification.permission==='granted')new Notification(t,{body:b});}
+
+// ── INIT ───────────────────────────────────────────────
+buildSlots();
+if(typeof Notification!=='undefined'&&Notification.permission==='granted'){document.getElementById('notif-btn').textContent='🔔 Alerts ON';document.getElementById('notif-btn').style.background='#10b981';}
+toast('👋 Welcome to FitXTrack!','No internet needed. Click Simulate Day to start!','info');
+</script>
+</body>
+</html>
